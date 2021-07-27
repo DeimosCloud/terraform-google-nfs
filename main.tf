@@ -60,6 +60,10 @@ resource "google_compute_instance_template" "tpl" {
   metadata                = var.metadata
   tags                    = local.tags
   metadata_startup_script = <<SCRIPT
+    #  Clean Up exports file
+    > /etc/exports
+
+    #  Install and Configure NFS server
     apt update && apt install -y nfs-kernel-server
     %{for path in var.export_paths}
     mkdir -p ${path}
@@ -68,6 +72,11 @@ resource "google_compute_instance_template" "tpl" {
     echo '${path} *(rw,sync,no_subtree_check)' >> /etc/exports
     %{endfor}
     systemctl restart nfs-kernel-server
+
+    # Setup Stackdriver
+    curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh
+    sudo bash add-monitoring-agent-repo.sh --also-install
+    sudo service stackdriver-agent start
   SCRIPT
 
   region = var.region
