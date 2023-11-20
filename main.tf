@@ -38,6 +38,7 @@ resource "google_compute_address" "default" {
   region       = var.region
   network_tier = var.attach_public_ip == false ? null : var.network_tier
   address_type = var.attach_public_ip == false ? "INTERNAL" : "EXTERNAL"
+  subnetwork   = var.subnetwork
 }
 
 // Use an external disk so that it can be remounted on another instance.
